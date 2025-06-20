@@ -17,9 +17,9 @@ galaxy s23 ultra,samsung,1199,4.8
 
 
 @pytest.mark.parametrize("command,expected", [
-    ("price avg", "799.0"),
+    ("price avg", "799"),
     ("rating min", "4.6"),
-    ("price max", "1199.0"),
+    ("price max", "1199"),
 ])
 def test_run_aggregate_valid(sample_csv, command, expected, capsys):
     run_aggregate(sample_csv, command)

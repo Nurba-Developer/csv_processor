@@ -1,9 +1,6 @@
-# main.py
-
 import argparse
-from typing import Optional
-from commands.filter import run_filter
-from commands.aggregate import run_aggregate
+from csv_processor.commands.filter import run_filter
+from csv_processor.commands.aggregate import run_aggregate
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -30,7 +27,7 @@ def main() -> None:
     try:
         if args.filter:
             run_filter(args.file, args.filter)
-        elif args.aggregate:
+        if args.aggregate:
             run_aggregate(args.file, args.aggregate)
     except Exception as e:
         print(f"Ошибка: {e}")
