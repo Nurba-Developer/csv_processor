@@ -1,42 +1,38 @@
 import csv
-from statistics import mean
-from csv_processor.models import CsvRow
+from typing import List
 
+def run_aggregate(file_path: str, command: str) -> None:
+    with open(file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        header = reader.fieldnames
+        if not header:
+            raise ValueError("CSV file does not contain headers.")
 
-def run_aggregate(file_path: str, command: str):
-    try:
-        column, func = command.strip().split()
-        func = func.lower()
-    except ValueError:
-        raise ValueError("Aggregate command must be in format: column function (e.g. rating avg)")
-    
-    supported_funcs = {"avg", "min", "max"}
-    if func not in supported_funcs:
-        raise ValueError(f"Unsupported function '{func}'. Use one of: {', '.join(supported_funcs)}")
+        try:
+            field, operation = command.split()
+        except ValueError:
+            raise ValueError(f"Invalid aggregation command format: '{command}'. Expected 'field operation'.")
 
-    values = []
+        if field not in header:
+            raise ValueError(f"Column '{field}' not found")
 
-    with open(file_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-
-        for row_data in reader:
-            row = CsvRow(row_data)
-            if column not in row.data:
-                raise ValueError(f"Column '{column}' not found in CSV.")
+        values: List[float] = []
+        for row in reader:
             try:
-                values.append(float(row.get(column)))
+                values.append(float(row[field]))
             except ValueError:
-                raise ValueError(f"Column '{column}' must contain numeric values only.")
+                raise ValueError(f"Column '{field}' must contain numeric values only")
 
-    if not values:
-        print("No values to aggregate.")
-        return
+        if not values:
+            raise ValueError(f"No numeric values found in column '{field}' for aggregation.")
 
-    if func == "avg":
-        result = mean(values)
-    elif func == "min":
-        result = min(values)
-    elif func == "max":
-        result = max(values)
+        if operation == "avg":
+            result: float = sum(values) / len(values)
+        elif operation == "min":
+            result = min(values)
+        elif operation == "max":
+            result = max(values)
+        else:
+            raise ValueError(f"Unsupported function")
 
-    print(f"{func.upper()} of '{column}': {result}")
+        print(f"{operation.upper()} values of '{field}': {result}")

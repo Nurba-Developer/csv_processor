@@ -1,64 +1,103 @@
+
 # CSV Processor
 
-Утилита для обработки CSV файлов с возможностью фильтрации и агрегирования данных через командную строку.
+Консольное Python-приложение для обработки CSV-файлов с функциями фильтрации и агрегации.
 
 ## Возможности
 
-- Фильтрация данных по условию (например, `price>500`)
-- Выполнение агрегатных операций (например, среднее значение по столбцу `rating`)
+- Фильтрация строк по условию: `filter <column> <operation> <value>`
+- Агрегация данных по числовым колонкам: `aggregate <column> <operation>`
+- Поддерживаемые операции: `avg`, `min`, `max`
 
 ## Установка
 
 1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/your_username/csv_processor.git
-   cd csv_processor
+
+```bash
+git clone https://github.com/<your-username>/csv_processor.git
+cd csv_processor
 ````
 
-2. Создайте и активируйте виртуальное окружение (рекомендуется):
+2. Установите зависимости:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/MacOS
-   venv\Scripts\activate     # Windows
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-3. Установите зависимости:
+*Или через `pyproject.toml` (если используется Poetry или PEP 621):*
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install .
+```
 
 ## Использование
 
 ```bash
-python main.py --file data.csv --filter "price>500"
-python main.py --file data.csv --aggregate "rating avg"
+python main.py filter <filename.csv> <column> <operation> <value>
 ```
 
-### Параметры
+Пример:
 
-* `--file` — путь к CSV файлу (обязательно)
-* `--filter` — условие фильтрации, например: `price>500`
-* `--aggregate` — агрегатная операция, например: `rating avg`
+```bash
+python main.py filter sample.csv price > 100
+```
+
+```bash
+python main.py aggregate <filename.csv> <column> <operation>
+```
+
+Пример:
+
+```bash
+python main.py aggregate data.csv price avg
+```
+
+## Поддерживаемые операторы
+
+### Для `filter`:
+
+* `==` — равно
+* `!=` — не равно
+* `>` — больше
+* `<` — меньше
+* `>=` — больше или равно
+* `<=` — меньше или равно
+
+### Для `aggregate`:
+
+* `avg` — среднее значение
+* `min` — минимальное значение
+* `max` — максимальное значение
+
+## Тестирование
+
+```bash
+pytest
+```
+
+Покрытие тестами:
+
+* Проверка фильтрации по числовым и строковым полям
+* Проверка агрегации по числовым значениям
+* Обработка ошибок: отсутствующая колонка, некорректная команда, нечисловые значения
 
 ## Структура проекта
 
 ```
 csv_processor/
 ├── commands/
+│   ├── __init__.py
 │   ├── filter.py
 │   └── aggregate.py
-├── utils.py
+├── tests/
+│   ├── test_filter.py
+│   └── test_aggregate.py
 ├── main.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Тестирование
+## Требования
 
-Для запуска тестов используйте:
-
-```bash
-pytest
-```
+* Python 3.10+
+* `pytest` для запуска тестов

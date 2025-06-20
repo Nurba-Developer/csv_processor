@@ -1,6 +1,4 @@
 import os
 
-
-def validate_file_path(path: str) -> bool:
-    """Проверка, существует ли CSV-файл и имеет ли правильное расширение"""
-    return os.path.isfile(path) and path.lower().endswith(".csv")
+def validate_file_path(file_path: str) -> bool:
+    return os.path.isfile(file_path) and file_path.lower().endswith('.csv')

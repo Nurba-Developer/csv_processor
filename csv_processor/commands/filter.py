@@ -1,54 +1,48 @@
-import csv
-from tabulate import tabulate
-from csv_processor.models import CsvRow
+from typing import Optional
 
+def compare(val: str, operator: str, target: str) -> bool:
+    try:
+        a_val = float(val)
+        b_val = float(target)
+    except ValueError:
+        a_val = val
+        b_val = target
+
+    if operator == ">":
+        return a_val > b_val
+    elif operator == "<":
+        return a_val < b_val
+    elif operator == "=":
+        return a_val == b_val
+    else:
+        raise ValueError(f"Unsupported operator: {operator}")
 
 def parse_filter_condition(condition: str) -> tuple[str, str, str]:
-    """Парсит строку фильтра, например price>500 → ('price', '>', '500')"""
-    for op in [">=", "<=", ">", "<", "="]:
+    for op in [">", "<", "="]:
         if op in condition:
-            column, value = condition.split(op)
-            return column.strip(), op, value.strip()
-    raise ValueError("Unsupported filter operator. Use one of: >, <, =, >=, <=")
+            parts = condition.split(op)
+            if len(parts) != 2:
+                raise ValueError("Invalid filter condition format.")
+            column = parts[0].strip()
+            value = parts[1].strip()
+            return column, op, value
+    raise ValueError("Filter condition must contain one of '>', '<', '=' operators.")
 
+def run_filter(file_path: str, condition: str) -> None:
+    import csv
+    from tabulate import tabulate
 
-def compare(val: str, op: str, target: str) -> bool:
-    """Сравнение строковых или числовых значений"""
-    try:
-        val_num = float(val)
-        target_num = float(target)
-    except ValueError:
-        val_num, target_num = val, target
+    column, operator, target = parse_filter_condition(condition)
 
-    if op == ">":
-        return val_num > target_num
-    elif op == "<":
-        return val_num < target_num
-    elif op == "=":
-        return val_num == target_num
-    elif op == ">=":
-        return val_num >= target_num
-    elif op == "<=":
-        return val_num <= target_num
-    else:
-        raise ValueError("Unknown comparison operator.")
+    with open(file_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        if column not in reader.fieldnames:
+            raise ValueError(f"Column '{column}' not found in CSV.")
 
+        filtered_rows = [row for row in reader if compare(row[column], operator, target)]
 
-def run_filter(file_path: str, condition: str):
-    column, op, value = parse_filter_condition(condition)
-
-    with open(file_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        filtered_rows = []
-
-        for row_data in reader:
-            row = CsvRow(row_data)
-            if column not in row.data:
-                raise ValueError(f"Column '{column}' not found in CSV.")
-            if compare(row.get(column), op, value):
-                filtered_rows.append(row.data)
-
-    if filtered_rows:
-        print(tabulate(filtered_rows, headers="keys", tablefmt="grid"))
-    else:
+    if not filtered_rows:
         print("No rows match the filter condition.")
+        return
+
+    print(tabulate(filtered_rows, headers="keys", tablefmt="grid"))

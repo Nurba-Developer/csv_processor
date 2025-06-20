@@ -1,18 +1,17 @@
-# Стартовая точка main.py
 import argparse
 import sys
-from csv_processor.commands.filter import run_filter
-from csv_processor.commands.aggregate import run_aggregate
-from csv_processor.utils import validate_file_path
 
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="CSV Processor")
     parser.add_argument("--file", type=str, required=True, help="Path to CSV file")
     parser.add_argument("--filter", type=str, help="Filter condition, e.g. price>500")
     parser.add_argument("--aggregate", type=str, help="Aggregate command, e.g. rating avg")
 
     args = parser.parse_args()
+
+    from csv_processor.utils import validate_file_path
+    from csv_processor.commands.filter import run_filter
+    from csv_processor.commands.aggregate import run_aggregate
 
     if not validate_file_path(args.file):
         print("Invalid file path or file not found.")
@@ -29,7 +28,6 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
